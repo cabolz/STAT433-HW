@@ -5,8 +5,24 @@ date: "2/3/2021"
 output: github_document
 ---
 
+```{r}
+library(readr)
+library(data.table)
+```
+
+
+I choose a smaller dataset to work with so I could easily read and interpret the file. Once I apply my findings, this code can be used for other bridge data sets by simply changing the link in the read.csv command.
+
+
+I intially started reading in the data with the read.csv, read_csv, and fread commands. All three of these commands produced 24 obs. of 123 variables. 
 
 ```{r}
-bridges = read_csv()
+bridges. = read.csv("https://www.fhwa.dot.gov/bridge/nbi/2019/delimited/VI19.txt")
+
+bridges_ = read_csv("https://www.fhwa.dot.gov/bridge/nbi/2019/delimited/VI19.txt")
+
+bridgesf = fread("https://www.fhwa.dot.gov/bridge/nbi/2019/delimited/VI19.txt")
 ```
+
+
 
