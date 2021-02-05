@@ -17,8 +17,7 @@ library(data.table)
 
 I chose a smaller dataset to work with so I could easily read and
 interpret the file. Once I apply my findings, this code can be used for
-other bridge data sets by simply changing the link in the read.csv
-command.
+other bridge data sets by simply changing the link in the fread command.
 
 The specific data set I used can be found at this
 [link](https://www.fhwa.dot.gov/bridge/nbi/2019/delimited/AK19.txt)
