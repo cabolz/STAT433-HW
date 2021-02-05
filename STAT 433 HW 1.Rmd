@@ -18,18 +18,18 @@ I chose a smaller dataset to work with so I could easily read and interpret the 
 
 The specific data set I used can be found at this [link](https://www.fhwa.dot.gov/bridge/nbi/2019/delimited/AK19.txt)
 
-I initially started reading in the data with the read.csv, read_csv, and fread commands. All three of these commands produced 1595 obs. of 123 variables. There are 1,595 bridges in Alaska and 123 variables being measured so this is correct. I did have to use header = T for the read.csv
+I initially started reading in the data with the read.csv, read_csv, and fread commands. 
 
 ```{r}
-bridgesA = read.csv("https://www.fhwa.dot.gov/bridge/nbi/2019/delimited/AK19.txt", header = T)
+bridgesA = read.csv("https://www.fhwa.dot.gov/bridge/nbi/2019/delimited/AK19.txt")
 
-bridgesB = read.csv("https://www.fhwa.dot.gov/bridge/nbi/2019/delimited/AK19.txt")
+bridgesB = read_csv("https://www.fhwa.dot.gov/bridge/nbi/2019/delimited/AK19.txt")
 
 bridgesC = fread("https://www.fhwa.dot.gov/bridge/nbi/2019/delimited/AK19.txt")
 ```
 
 
-Then looked at the head of each dataset and their structures. I found that the heads were all the same. I examined the first 60 or so variables and the strucutre was the same for each column across the three sets.
+All three of these commands produced 1595 obs. of 123 variables. There are 1,595 bridges in Alaska and 123 variables being measured so this is correct. read_csv had issues, reading in the column YEAR_OF_IMP_097 as logi when it should be int. read.csv and fread correctly read this in.
 ```{r}
 head(bridgesA, n = c(3L, 6L))
 head(bridgesB, n = c(3L, 6L))
@@ -38,7 +38,9 @@ head(bridgesC, n = c(2L))
 str(bridgesA)
 str(bridgesB)
 str(bridgesC)
-
-
+```
+Everything else appears to be read in correctly for read.csv and fread after reviewing them. I decided to use fread in the end, instead of read.csv due to it being significantly faster. I then wrote the data file to a csv for easy distribution.
+```{r}
+write.csv(bridgesC, file = "Bridges.csv")
 ```
 
