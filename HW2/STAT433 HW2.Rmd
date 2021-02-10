@@ -8,7 +8,7 @@ header-includes:
     - \hypersetup {colorlinks = true, linkcolor = red, urlcolor = red}
 ---
 
-
+My GitHub repository for this class can be found at this [link](https://github.com/cabolz/STAT433-HW)
 ```{r}
 library(dplyr)
 library(nycflights13)

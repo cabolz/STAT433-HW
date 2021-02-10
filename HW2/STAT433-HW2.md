@@ -90,4 +90,4 @@ flights %>%
   labs(x = "Avg Delay per Day", y = "Proportion of Cancelled Flights per Day", title = "Average Delay vs Cancelled Flights")
 ```
 
-![](STAT443-HW2_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+![](STAT433-HW2_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
