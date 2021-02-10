@@ -7,6 +7,9 @@ Caitlin Bolz
 
 
 
+My GitHub repository for this class can be found at this
+[link](https://github.com/cabolz/STAT433-HW)
+
 ``` r
 library(dplyr)
 ```
