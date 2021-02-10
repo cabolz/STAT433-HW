@@ -2,7 +2,10 @@
 title: "STAT 433 HW2"
 author: "Caitlin Bolz"
 date: "2/10/2021"
-output: html_document
+output: github_document
+header-includes:
+    - \usepackage {hyperref}
+    - \hypersetup {colorlinks = true, linkcolor = red, urlcolor = red}
 ---
 
 
