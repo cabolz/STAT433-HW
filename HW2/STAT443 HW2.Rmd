@@ -1,16 +1,15 @@
 ---
 title: "STAT 433 HW2"
 author: "Caitlin Bolz"
-date: "2/9/2021"
+date: "2/10/2021"
 output: html_document
 ---
 
-# In-Class Exercise
+
 ```{r}
 library(dplyr)
 library(nycflights13)
 library(ggplot2)
-head(flights)
 ```
 
 
@@ -33,28 +32,10 @@ flights$sched_dep_time = (floor(flights$sched_dep_time/100)*60 +
                             flights$sched_dep_time %% 100)
 ```
 
-```{r}
-transmute(flights,deptime = dep_time/60, schedeptime=sched_dep_time/60)
-```
-
 
 
 # Question 3
-Look at the number of canceled flights per day. Is there a pattern? 
-
-Is the proportion of canceled flights related to the average delay? Use multiple dyplr operations, all on one line, concluding with `ggplot(aes(x= ,y=)) + geom_point()’
-
-group_by and summarize
-```{r}
-flights %>% group_by(is.na(dep_time))%>% ggplot(aes((dep_time), origin)) + geom_point()
-
-flights %>% ggplot(aes((dep_time), origin)) + geom_point()
-
-flights %>% ggplot(aes(x = dep_delay, y = is.na(dep_time)))
-```
-
-
-
+Look at the number of canceled flights per day. Is there a pattern? Is the proportion of canceled flights related to the average delay? Use multiple dyplr operations, all on one line, concluding with `ggplot(aes(x= ,y=)) + geom_point()’
 
 
 ```{r}
@@ -68,4 +49,3 @@ flights %>%
   geom_point(aes(x = mean_arr), colour = "blue") +
   labs(x = "Avg Delay per Day", y = "Proportion of Cancelled Flights per Day", title = "Average Delay vs Cancelled Flights")
 ```
-
