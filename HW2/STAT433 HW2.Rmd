@@ -22,6 +22,8 @@ How many flights have a missing dep_time? What other variables are missing? What
 8,255 rows with missing dep_time. They also have missing dep_delay, arr_time, arr_delay, and air_time. These rows represent flights that never took off, so canceled flights.
 ```{r}
 flights %>% filter(is.na(dep_time))
+
+flights %>%  filter(complete.cases(dep_time), is.na(arr_time)) %>% View
 ```
 
 
@@ -33,6 +35,8 @@ flights$dep_time = (floor(flights$dep_time/100)*60 + flights$dep_time %% 100)
 
 flights$sched_dep_time = (floor(flights$sched_dep_time/100)*60 + 
                             flights$sched_dep_time %% 100)
+
+# maybe also have mutate int here
 ```
 
 
