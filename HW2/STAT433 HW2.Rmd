@@ -2,11 +2,13 @@
 title: "STAT 433 HW2"
 author: "Caitlin Bolz"
 date: "2/10/2021"
-output: github_document
+output: html_document
 header-includes:
     - \usepackage {hyperref}
     - \hypersetup {colorlinks = true, linkcolor = red, urlcolor = red}
 ---
+
+# submit them in an html
 
 My GitHub repository for this class can be found at this [link](https://github.com/cabolz/STAT433-HW)
 ```{r}
@@ -43,16 +45,25 @@ flights$sched_dep_time = (floor(flights$sched_dep_time/100)*60 +
 
 # Question 3
 Look at the number of canceled flights per day. Is there a pattern? Is the proportion of canceled flights related to the average delay? Use multiple dyplr operations, all on one line, concluding with `ggplot(aes(x= ,y=)) + geom_point()’
+```{r}
+sum(is.na(flights$dep_time))
+sum(is.na(flights$arr_time))
+
+```
 
 
 ```{r}
-flights %>%
-  group_by(day) %>%
-  summarise(cancelled = mean(is.na(dep_delay)),
+flights %>% group_by(month, day) %>% 
+  summarise(cancelled = mean(is.na(arr_time)),
             mean_dep = mean(dep_delay, na.rm = T),
             mean_arr = mean(arr_delay, na.rm = T)) %>%
   ggplot(aes(y = cancelled)) +
-  geom_point(aes(x = mean_dep), colour = "red") +
-  geom_point(aes(x = mean_arr), colour = "blue") +
-  labs(x = "Avg Delay per Day", y = "Proportion of Cancelled Flights per Day", title = "Average Delay vs Cancelled Flights")
+  geom_point(aes(x = mean_dep, colour = "dep_delay")) +
+  geom_point(aes(x = mean_arr, colour = "arr_delay")) +
+  labs(x = "Delays per Day", y = "Proportion of Cancelled Flights per Day", title = "Average Delay vs Cancelled Flights")
 ```
+
+```{r}
+
+```
+
