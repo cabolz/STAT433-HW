@@ -1,70 +1,58 @@
 ---
 title: "STAT 433 HW2"
 author: "Caitlin Bolz"
-date: "2/10/2021"
+date: "2/11/2021"
 output: html_document
 header-includes:
     - \usepackage {hyperref}
     - \hypersetup {colorlinks = true, linkcolor = red, urlcolor = red}
 ---
 
-# submit them in an html
-hi
-
 My GitHub repository for this class can be found at this [link](https://github.com/cabolz/STAT433-HW)
-```{r}
+
+```{r message=FALSE, warning=FALSE}
 library(dplyr)
 library(nycflights13)
 library(ggplot2)
+library(lubridate)
 ```
 
 
 # Question 1
-How many flights have a missing dep_time? What other variables are missing? What might these rows represent?
 
-8,255 rows with missing dep_time. They also have missing dep_delay, arr_time, arr_delay, and air_time. These rows represent flights that never took off, so canceled flights.
+8,713 rows with missing dep_time. They also have missing dep_delay, arr_time, arr_delay, and air_time. There is 458 flights that have a departure time but no arrival time. These rows represent flights that were canceled or not completed in some capacity. Without knowing more about the data, it is difficult to say exactly what caused these flights to be canceled. 
+
 ```{r}
-flights %>% filter(is.na(dep_time))
-
-flights %>%  filter(complete.cases(dep_time), is.na(arr_time)) %>% View
+flights %>% filter(is.na(arr_time))
+sum(is.na(flights$arr_time)) - sum(is.na(flights$dep_time))
 ```
 
 
 # Question 2
-Currently dep_time and sched_dep_time are convenient to look at, but hard to compute with because they’re not really continuous numbers. Convert them to a more convenient representation of number of minutes since midnight.
+
+Departure time and scheduled departure time have been rewritten using floor, %%, and mathematical operations to be represented in number of minutes since midnight. Because we are just using this locally and not collaborating with anyone else, I rewrote these columns to save them.
 
 ```{r}
 flights$dep_time = (floor(flights$dep_time/100)*60 + flights$dep_time %% 100)
 
 flights$sched_dep_time = (floor(flights$sched_dep_time/100)*60 + 
                             flights$sched_dep_time %% 100)
-
-# maybe also have mutate int here
 ```
-
 
 
 # Question 3
-Look at the number of canceled flights per day. Is there a pattern? Is the proportion of canceled flights related to the average delay? Use multiple dyplr operations, all on one line, concluding with `ggplot(aes(x= ,y=)) + geom_point()’
-```{r}
-sum(is.na(flights$dep_time))
-sum(is.na(flights$arr_time))
 
-```
-
+There is a upward sloping quadratic pattern between the average delay per day and the proportion of canceled flights per day. There is four points in the top left of the graph that are outliers from this pattern. Those points correspond to February 8th and 9th when there was likely a massive snowstorm that caused a lot of flights to be grounded. In general the proportion of canceled flights per day is not affected differently by arrival and departure delays.
 
 ```{r}
-flights %>% group_by(month, day) %>% 
+flights %>% 
+  group_by(month, day) %>% 
   summarise(cancelled = mean(is.na(arr_time)),
             mean_dep = mean(dep_delay, na.rm = T),
-            mean_arr = mean(arr_delay, na.rm = T)) %>%
+            mean_arr = mean(arr_delay, na.rm = T), .groups = 'keep') %>%
   ggplot(aes(y = cancelled)) +
-  geom_point(aes(x = mean_dep, colour = "dep_delay")) +
-  geom_point(aes(x = mean_arr, colour = "arr_delay")) +
-  labs(x = "Delays per Day", y = "Proportion of Cancelled Flights per Day", title = "Average Delay vs Cancelled Flights")
+  geom_point(aes(x = mean_dep, color = "dep_delay")) +
+  geom_point(aes(x = mean_arr, color = "arr_delay")) +
+  labs(x = "Average Delay per Day in Min", y = "Proportion of Cancelled Flights per Day", 
+       title = "Average Delay vs Cancelled Flights")
 ```
-
-```{r}
-
-```
-
