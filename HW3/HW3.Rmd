@@ -1,0 +1,24 @@
+---
+title: "HW3"
+author: "Caitlin Bolz"
+date: "2/18/2021"
+output: html_document
+---
+
+Due Monday March 1 (less than two weeks away!)
+
+In r4ds flights… What time of day should you fly if you want to avoid delays as much as possible? Does this choice depend on anything? Season? Weather? Airport? Airline? Find three patterns (“null results” are ok!). 
+
+Write your results into Rmarkdown. Include a short introduction that summarizes the three results. Then, have a section for each finding. Support each finding with data summaries and visualizations. Include your code when necessary. This shouldn’t be long, but it might take some time to find the things you want to talk about and lay them out in an orderly way.
+
+```{r include=FALSE}
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+library(nycflights13)
+```
+
+```{r}
+head(flights)
+```
+

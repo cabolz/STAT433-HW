@@ -4,7 +4,7 @@ rm(list =ls())
 library(tidyr)
 library(dplyr)
 
-table1  # if this doesn't load, make sure you have the most recent versions of tidyr and dplyr.
+table1 
 table2
 table3
 table4a
@@ -40,18 +40,22 @@ ggplot(table1, aes(year, cases)) +
 
 
 # Exercise:
-# Compute the rate for table2, and table4a + table4b. You will need to perform four operations:
+# Compute the rate for table2, and table4a + table4b. 
+# You will need to perform four operations:
 #   
-#   Extract the number of TB cases per country per year.
+# Extract the number of TB cases per country per year.
 # Extract the matching population per country per year.
 # Divide cases by population, and multiply by 10000.
 # Store back in the appropriate place.
 # Which representation is easiest to work with? Which is hardest? Why?
 
 
+table4a[,-1]/table4b[,-1]*10000
 
+cbind(table4a[,1],table4a[,-1]/table4b[,-1]*10000)
 
-#     In data analysis, tidy data is the agile stance.  It facilitates quick and dynamic interactions with your data.
+# In data analysis, tidy data is the agile stance.  
+# It facilitates quick and dynamic interactions with your data.
 
 # I like to think:  
 # Rows index the *units of observation* (i.e. "an observation" is one row).  
@@ -61,8 +65,8 @@ ggplot(table1, aes(year, cases)) +
 
 
 # to tidy the data (or organize it), two functions are particularly helpful:
-# pivot_longer
-# pivot_wider
+# pivot_longer -- makes more rows
+# pivot_wider -- makes more columns
 
 # We are going to use those functions to tidy these tibbles:
 table2
@@ -70,11 +74,14 @@ table4a
 table4b
 
 #  In brief....
-# When units of analysis are distributed across different columns (i.e. variables of the "same thing" take up several columns),
-#   then pivot_longer gets you tidy.  pivot_longer takes a tibble which is too wide and makes it thinner and taller. 
+# When units of analysis are distributed across different columns 
+# (i.e. variables of the "same thing" take up several columns),
+# then pivot_longer gets you tidy.  pivot_longer takes a tibble which is too
+# wide and makes it thinner and taller. 
 
-# When measurements are distributed across different rows (i.e. measurements on a unit of analysis takes up several rows), 
-#  Then, your tibble is too long.  pivot_wider makes it shorter and wider.
+# When measurements are distributed across different rows (i.e. measurements 
+# on a unit of analysis takes up several rows), 
+# Then, your tibble is too long.  pivot_wider makes it shorter and wider.
 
 
 
@@ -85,6 +92,8 @@ table4b
 table4a  # columns are identifiers!
 table4a %>% 
   pivot_longer(c(`1999`, `2000`), names_to = "year", values_to = "cases")
+# note: there are not the standard quotes, use ` `
+
 
 # pipe data, then 
 #   1) names of columns you wish to pivot.  This will create two new columns. 
@@ -119,12 +128,15 @@ table2  # this has the "opposite problem"!
 ### pivot_wider #######
 ##################
 
-# pivot_wider is the opposite of pivot_longer. You use it when an observation is scattered across multiple rows. 
+# pivot_wider is the opposite of pivot_longer. You use it when an observation
+# is scattered across multiple rows. 
 table2
 
 # This time, however, we only need two parameters:
 
-# 1) The column that contains variable names. This should be a "qualitative" variable (factor or character).  Those character strings are going to become column names.
+# 1) The column that contains variable names. This should be a "qualitative" 
+# variable (factor or character).  Those character strings are going to become 
+# column names.
 # 
 # 2) The column that contains values.
 
@@ -150,10 +162,11 @@ stocks %>%
   pivot_wider(names_from = year, values_from = return) %>% 
   pivot_longer(`2015`:`2016`, names_to = "year", values_to = "return")
 
+# year becomes a chr
 
 # why doesn't this run?
 table4a %>% 
-  pivot_longer(c(1999, 2000), names_to = "year", values_to = "cases")
+  pivot_longer(c(`1999`, `2000`), names_to = "year", values_to = "cases")
 
 
 
@@ -167,6 +180,8 @@ people <- tribble(
   "Jessica Cordero", "age",       37,
   "Jessica Cordero", "height",   156
 )
+
+# Phillip has two ages which will causes issues
 
 pivot_wider(people, names_from = key, values_from = value)
 
@@ -184,19 +199,23 @@ table3 %>%
 
 
 table3 %>% 
-  separate(rate, into = c("cases", "population"), sep = "/", convert=T)  # sep is a regular expression!
+  separate(rate, into = c("cases", "population"), sep = "/", convert=T)  
+# sep is a regular expression!
 
 table3 %>% 
-  separate(year, into = c("century", "year"), sep = 2)  # this probably isn't a good idea for any ensuing data analysis... it is here to illustrate the function.
+  separate(year, into = c("century", "year"), sep = 2)  
+# this probably isn't a good idea for any ensuing data analysis... it is here 
+# to illustrate the function.
 
 table3 %>% 
-  separate(year, into = c("century", "year"), sep = 2)  #  notice the difference between this line and the last...
+  separate(year, into = c("century", "year"), sep = 2)  
+#  notice the difference between this line and the last...
 
 
 # Unite puts to columns together into a single column.
 table5
 table5 %>% 
-  unite(new, century, year, sep = "")
+  unite(year, century, year, sep = "")
 
 
 
@@ -233,12 +252,8 @@ stocks %>%
 
 
 
-#  Tidy data is great for "90%" of "small data" problems (remember: small data is data that you can fit in memory, i.e. load into R)
-#    As such, I think of tidy data as a default "null hypothesis" for how to store data.
-#    Of course, there is another "10%" of problems.  See here:  http://simplystatistics.org/2016/02/17/non-tidy-data/
-
-
-
-
-
-
+# Tidy data is great for "90%" of "small data" problems (remember: small data 
+# is data that you can fit in memory, i.e. load into R)
+# As such, I think of tidy data as a default "null hypothesis" for how to store data.
+# Of course, there is another "10%" of problems.  
+# See here:  http://simplystatistics.org/2016/02/17/non-tidy-data/
