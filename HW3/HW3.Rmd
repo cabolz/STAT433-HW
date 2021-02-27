@@ -7,9 +7,18 @@ output: html_document
 
 Due Monday March 1 (less than two weeks away!)
 
-In r4ds flights… What time of day should you fly if you want to avoid delays as much as possible? Does this choice depend on anything? Season? Weather? Airport? Airline? Find three patterns (“null results” are ok!). 
+What time of day should you fly if you want to avoid delays as much as possible? 
+Does this choice depend on anything? Season? Weather? Airport? Airline? 
 
-Write your results into Rmarkdown. Include a short introduction that summarizes the three results. Then, have a section for each finding. Support each finding with data summaries and visualizations. Include your code when necessary. This shouldn’t be long, but it might take some time to find the things you want to talk about and lay them out in an orderly way.
+Find three patterns (“null results” are ok!). 
+
+* Introduction -- summarizes the three results
+* Section for each finding
+* Support each finding with data summaries and visualizations
+* Include code only when necessary
+
+
+Talk about how I'm looking specifically at departure delay isntead of arrival delay. Arrival delay is based more on what happens in the air and can't be controlled as well. Departure delay is based on what  happens on the ground and is more controllable
 
 ```{r include=FALSE}
 library(tidyr)
@@ -18,7 +27,89 @@ library(ggplot2)
 library(nycflights13)
 ```
 
+
 ```{r}
 head(flights)
 ```
 
+
+What weather conditions make it more likely to see a delay?
+
+Almost any amount of precipitation is associated with a delay.
+However, there is not a strong a trend above 0.02 in. of precipitation.
+```{r}
+flight_weather <-
+  flights %>%
+  inner_join(weather, by = c(
+    "origin" = "origin",
+    "year" = "year",
+    "month" = "month",
+    "day" = "day",
+    "hour" = "hour"
+  ))
+```
+
+```{r}
+flight_weather = flight_weather %>%
+  group_by(precip) %>%
+  mutate(delay = mean(dep_delay, na.rm = TRUE))
+  
+ggplot(flight_weather, aes(x = precip, y = delay)) +
+  geom_line() + geom_point()
+```
+
+```{r}
+ggplot(flight_weather) + 
+  geom_jitter(aes(x = dep_time, y = precip, col = delay)) 
+  
+```
+
+There seems to be a stronger relationship between visibility and delay.
+Delays are higher when visibility is less than 2 miles.
+```{r}
+flight_weather %>%
+  ungroup() %>%
+  mutate(visib_cat = cut_interval(visib, n = 10)) %>%
+  group_by(visib_cat) %>%
+  summarise(dep_delay = mean(dep_delay, na.rm = TRUE)) %>%
+  ggplot(aes(x = visib_cat, y = dep_delay)) +
+  geom_point()
+```
+
+```{r}
+flight_weather %>%
+  ungroup() %>%
+  mutate(visib_cat = cut_interval(visib, n = 10)) %>%
+  group_by(visib_cat) %>%
+  summarise(dep_delay = mean(dep_delay, na.rm = TRUE)) %>%
+  ggplot(aes(x = visib_cat, y = dep_time)) +
+  geom_point()
+```
+
+
+
+Graph looking strictly at flight times and delay
+
+```{r}
+flights %>%
+  group_by(hour) %>%
+  filter(!is.na(dep_delay)) %>%
+  summarise( delay = mean( dep_delay, na.rm = T)) %>%
+  ggplot(aes(hour, delay, fill = delay)) + geom_col() 
+```
+
+```{r}
+flights %>%
+  group_by(hour) %>%
+  summarize(m = mean(dep_delay, na.rm = TRUE),
+            sd = sd(dep_delay, na.rm = TRUE),
+            low_ci = m - 2*sd,
+            high_ci = m + 2*sd,
+            n = n()) %>%
+  ggplot(aes(hour, m, ymin = low_ci, ymax = high_ci)) +
+  geom_pointrange()
+```
+
+
+
+Worst time to flight is in the early evening. Although that happens because more flights go out on that specific time also.
