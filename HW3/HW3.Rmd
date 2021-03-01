@@ -36,7 +36,7 @@ flights %>%
   group_by(hour) %>%
   filter(!is.na(dep_delay)) %>%
   summarise( delay = mean( dep_delay > 0 , na.rm = T)) %>%
-  ggplot() + geom_col(aes(hour, delay)) 
+  ggplot() + geom_col(aes(hour, delay, fill = delay)) + scale_fill_continuous(type = "viridis")
 ```
 
 
@@ -55,11 +55,38 @@ flights %>%
   ggplot() + geom_col(aes(avg, reorder(dest, avg), fill = avg)) + scale_fill_continuous(type = "viridis")
 ```
 
+```{r fig.width=6, fig.height=13}
+flights %>%
+  group_by(dest, hour) %>%
+  filter(!is.na(dep_delay)) %>%
+  filter(!is.na(dest)) %>% 
+  summarise(tot_mins = sum(dep_delay[dep_delay > 0]),
+            n = n(),
+            avg = tot_mins/n,
+            .groups = "keep") %>% 
+  ggplot() + geom_point(aes(avg, reorder(dest, avg), col = hour)) + scale_color_gradientn(colours = rainbow(6))
+```
 
 
-# Precipitation
+```{r}
+flight_weather %>%
+  ungroup() %>%
+  mutate(visib_cat = cut_interval(visib, n = 10)) %>%
+  group_by(hour, visib_cat) %>%
+  summarise(dep_delay = mean(dep_delay, na.rm = TRUE), .groups = "keep") %>%
+  ggplot() +
+  geom_point(aes(x = visib_cat, y = dep_delay, col = hour)) + 
+  scale_color_gradientn(colours = rainbow(6)) + 
+  labs(title = "Visibility vs. Departure Delay", 
+       x = "Visibility", 
+       y = "Mean Departure Delay", 
+       caption = "Lower visibility means you can't see as far",
+       col = "Hour")
+```
 
-Almost any amount of precipitation is associated with a delay. However, there is not a strong a trend above 0.02 in. of precipitation.
+
+# weather
+
 ```{r}
 flight_weather =
   flights %>%
@@ -69,12 +96,12 @@ flight_weather =
     "month" = "month",
     "day" = "day",
     "hour" = "hour")) %>% 
-  group_by(precip) %>% 
   mutate(delay = mean(dep_delay, na.rm = T))
 ```
 
+# Precipitation
 
-
+Almost any amount of precipitation is associated with a delay. However, there is not a strong a trend above 0.02 in. of precipitation.
 ```{r}
 flight_weather %>% 
   ungroup() %>% 
@@ -84,11 +111,23 @@ flight_weather %>%
   ggplot(aes(x = precip_cat, y = delay, fill= delay)) +
   geom_col() + scale_fill_continuous(type = "viridis") 
 ```
+```{r}
+flight_weather %>% 
+  ungroup() %>% 
+  group_by(hour, precip) %>% 
+  summarise(delay = mean(dep_delay, na.rm = T), .groups = "keep") %>% 
+  ggplot() + geom_point(aes(x =hour, y = delay, col = precip)) + scale_color_gradientn(colours = rainbow(6))
+```
 
 ```{r}
-ggplot(flights3) + 
-  geom_jitter(aes(x = hour, y = precip, col = delay)) + scale_color_gradientn(colours = rainbow(5))
+flight_weather %>% 
+  ungroup() %>% 
+  group_by(hour, precip) %>% 
+  summarise(delay = mean(dep_delay, na.rm = T), .groups = "keep") %>% 
+  ggplot() + geom_point(aes(x =precip, y = delay, col = hour)) + scale_color_gradientn(colours = rainbow(6))
 ```
+
+
 
 # Visibility
 
@@ -101,7 +140,7 @@ flight_weather %>%
   group_by(visib_cat) %>%
   summarise(dep_delay = mean(dep_delay, na.rm = TRUE)) %>%
   ggplot(aes(x = visib_cat, y = dep_delay, fill = dep_delay)) +
-  geom_col() + scale_fill_continuous(type = "viridis") + +
+  geom_col() + scale_fill_continuous(type = "viridis") + 
   labs(title = "Visibility vs. Departure Delay", 
        x = "Visibility", 
        y = "Mean Departure Delay", 
