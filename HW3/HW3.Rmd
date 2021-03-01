@@ -5,31 +5,70 @@ date: "2/18/2021"
 output: html_document
 ---
 
-Due Monday March 1 (less than two weeks away!)
+Due Monday March 1
 
 What time of day should you fly if you want to avoid delays as much as possible? 
 Does this choice depend on anything? Season? Weather? Airport? Airline? 
 
-Find three patterns (“null results” are ok!). 
+Three patterns
+* precipitation
+* destination
+* visibility
 
+Report
 * Introduction -- summarizes the three results
 * Section for each finding
 * Support each finding with data summaries and visualizations
 * Include code only when necessary
 
 
-Talk about how I'm looking specifically at departure delay isntead of arrival delay. Arrival delay is based more on what happens in the air and can't be controlled as well. Departure delay is based on what  happens on the ground and is more controllable
+Talk about how I'm looking specifically at departure delay instead of arrival delay. Arrival delay is based more on what happens in the air and can't be controlled as well. Departure delay is based on what  happens on the ground and is more controllable
 
 ```{r include=FALSE}
 library(tidyr)
 library(dplyr)
 library(ggplot2)
 library(nycflights13)
+library(grid)
+```
+
+Graph looking strictly at flight times and delay
+```{r}
+flights %>%
+  group_by(hour) %>%
+  filter(!is.na(dep_delay)) %>%
+  summarise( delay = mean( dep_delay > 0 , na.rm = T)) %>%
+  ggplot() + geom_col(aes(hour, delay)) 
+```
+
+For each destination, compute the total minutes of delay. For each, flight, compute the proportion of the total delay for its destination.
+```{r fig.width=6, fig.height=13}
+flights %>%
+  group_by(dest) %>%
+  filter(!is.na(dep_delay)) %>%
+  filter(!is.na(dest)) %>% 
+  summarise(tot_mins = sum(dep_delay[dep_delay > 0]),
+            n = n(),
+            avg = tot_mins/n) %>%  
+  ggplot() + geom_col(aes(avg, reorder(dest, avg)))
 ```
 
 
+Worst time to flight is in the early evening. Although that happens because more flights go out on that specific time also.
+
+
 ```{r}
-head(flights)
+flights1 = flights %>%
+  group_by(hour) %>%
+  filter(!is.na(dep_delay)) %>%
+  mutate( delay = mean(dep_delay, na.rm = T))
+
+ggplot(flights1) +
+  geom_col(aes(hour, delay)) + 
+  scale_y_log10()
+
+flights %>% group_by(hour) %>% 
+  filter(!is.na(dep_delay))
 ```
 
 
@@ -53,14 +92,28 @@ flight_weather <-
 flight_weather = flight_weather %>%
   group_by(precip) %>%
   mutate(delay = mean(dep_delay, na.rm = TRUE))
-  
+```
+
+
+
+
+
+
+
+```{r}
 ggplot(flight_weather, aes(x = precip, y = delay)) +
   geom_line() + geom_point()
 ```
 
 ```{r}
+
+sum(is.na(flight_weather$precip))
+sum(is.na(flight_weather$dep_time))
+
 ggplot(flight_weather) + 
   geom_jitter(aes(x = dep_time, y = precip, col = delay)) 
+
+ggplot(flight_weather) + geom_point(aes(x = dep_time, y ))
   
 ```
 
@@ -88,28 +141,9 @@ flight_weather %>%
 
 
 
-Graph looking strictly at flight times and delay
-
-```{r}
-flights %>%
-  group_by(hour) %>%
-  filter(!is.na(dep_delay)) %>%
-  summarise( delay = mean( dep_delay, na.rm = T)) %>%
-  ggplot(aes(hour, delay, fill = delay)) + geom_col() 
-```
-
-```{r}
-flights %>%
-  group_by(hour) %>%
-  summarize(m = mean(dep_delay, na.rm = TRUE),
-            sd = sd(dep_delay, na.rm = TRUE),
-            low_ci = m - 2*sd,
-            high_ci = m + 2*sd,
-            n = n()) %>%
-  ggplot(aes(hour, m, ymin = low_ci, ymax = high_ci)) +
-  geom_pointrange()
-```
 
 
 
-Worst time to flight is in the early evening. Although that happens because more flights go out on that specific time also.
+
+
+
