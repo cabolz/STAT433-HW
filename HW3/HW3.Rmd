@@ -8,19 +8,13 @@ output: html_document
 What time of day should you fly if you want to avoid delays as much as possible? 
 Does this choice depend on anything? Season? Weather? Airport? Airline? 
 
-Three patterns
-* precipitation ???
-* destination
-* visibility
-
-Report
-* Introduction -- summarizes the three results
-* Section for each finding
-* Support each finding with data summaries and visualizations
-* Include code only when necessary
 
 
-Talk about how I'm looking specifically at departure delay instead of arrival delay. Arrival delay is based more on what happens in the air and can't be controlled as well. Departure delay is based on what  happens on the ground and is more controllable. Maybe talk about hour vs sched_dep_time vs dep_time
+# Introduction 
+
+Delays are unfortunately inevitable in life, but there are some steps an individual can take to reduce their airport flight delays. In this report I looked specifically at departure delay instead of arrival delay. I found departure delay to be more meaningful because it is based on what happens on the ground. An individual has more control over departure delay compared to arrival delay because arrival delay is based more on what happens while the plane is in the air. 
+
+You want to fly earlier in the day to minimize delays. This report specifically examines destination airports, precipitation, and visibility. Your destination airport affects your delay time, with some airports having short delays and others having long delays. The more precipitation on a given day, the longer your delay will be in general. The lower the visibility, the longer the delay. Additionally, at any given visibility delays will be shorter earlier in the day.
 
 ```{r include=FALSE}
 library(tidyr)
@@ -30,63 +24,19 @@ library(nycflights13)
 library(grid)
 ```
 
-Graph looking strictly at flight times and delay
+First I looked at the relationship between time of day and mean delay. It was found that the earlier in the day you fly, the shorter your delays will be. 
 ```{r}
 flights %>%
   group_by(hour) %>%
   filter(!is.na(dep_delay)) %>%
-  summarise( delay = mean( dep_delay > 0 , na.rm = T)) %>%
-  ggplot() + geom_col(aes(hour, delay, fill = delay)) + scale_fill_continuous(type = "viridis")
+  summarise(delay = mean( dep_delay > 0 , na.rm = T)) %>%
+  ggplot() + geom_col(aes(hour, delay, fill = delay)) + scale_fill_continuous(type = "viridis") +
+  labs(title = "Mean Flight Delay per Hour",
+       x = "Hour of Day",
+       y = "Average Delay (min)",
+       fill = "Delay")
 ```
-
-
-
-# Destination
-
-Average delay for each destination
-```{r fig.width=6, fig.height=13}
-flights %>%
-  group_by(dest) %>%
-  filter(!is.na(dep_delay)) %>%
-  filter(!is.na(dest)) %>% 
-  summarise(tot_mins = sum(dep_delay[dep_delay > 0]),
-            n = n(),
-            avg = tot_mins/n) %>%  
-  ggplot() + geom_col(aes(avg, reorder(dest, avg), fill = avg)) + scale_fill_continuous(type = "viridis")
-```
-
-```{r fig.width=6, fig.height=13}
-flights %>%
-  group_by(dest, hour) %>%
-  filter(!is.na(dep_delay)) %>%
-  filter(!is.na(dest)) %>% 
-  summarise(tot_mins = sum(dep_delay[dep_delay > 0]),
-            n = n(),
-            avg = tot_mins/n,
-            .groups = "keep") %>% 
-  ggplot() + geom_point(aes(avg, reorder(dest, avg), col = hour)) + scale_color_gradientn(colours = rainbow(6))
-```
-
-
-```{r}
-flight_weather %>%
-  ungroup() %>%
-  mutate(visib_cat = cut_interval(visib, n = 10)) %>%
-  group_by(hour, visib_cat) %>%
-  summarise(dep_delay = mean(dep_delay, na.rm = TRUE), .groups = "keep") %>%
-  ggplot() +
-  geom_point(aes(x = visib_cat, y = dep_delay, col = hour)) + 
-  scale_color_gradientn(colours = rainbow(6)) + 
-  labs(title = "Visibility vs. Departure Delay", 
-       x = "Visibility", 
-       y = "Mean Departure Delay", 
-       caption = "Lower visibility means you can't see as far",
-       col = "Hour")
-```
-
-
-# weather
-
+We also need to combine our flights and weather data sets for some of our analysis.
 ```{r}
 flight_weather =
   flights %>%
@@ -99,8 +49,55 @@ flight_weather =
   mutate(delay = mean(dep_delay, na.rm = T))
 ```
 
+
+# Destination
+
+Some destination airports tend to have much longer delays than others. 
+
+Tulsa International Airport (TUL) and Columbia Metropolitian Airport (CAE) have the longest delay times for destination airports, regardless of time of day. Palm Springs International and Key West International Airport (EYW) have the shortest delay times for destination airports, regardless of time of day. Usually when going on a trip you determine your destination and then plan the rest of your trip around that. 
+
+It isn't likely that someone sees Tulsa has long delays and decides to avoid that city. So instead we need to look if there is a time of day that it is better to fly to these airports. When we take into account hour of day of the flight we see that generally there are shorter delays early in the day and longer delays later in the day. This doesn't apply to every flight, but is a good rule of thumb to follow. If you have to fly to an airport that has long delay times, it is best to fly there earlier in the day.
+
+
+```{r fig.width=6, fig.height=13}
+flights %>%
+  group_by(dest) %>%
+  filter(!is.na(dep_delay)) %>%
+  filter(!is.na(dest)) %>% 
+  summarise(tot_mins = sum(dep_delay[dep_delay > 0]),
+            n = n(),
+            avg = tot_mins/n) %>%  
+  ggplot() + 
+  geom_col(aes(avg, reorder(dest, avg), fill = avg)) + 
+  scale_fill_continuous(type = "viridis") + 
+  labs(title = "Delay for all Destination Aiports",
+       x = "Delay (min)",
+       y = "Destination Airport",
+       fill = "Delay")
+```
+
+```{r fig.width=6, fig.height=13}
+flights %>%
+  group_by(dest, hour) %>%
+  filter(!is.na(dep_delay)) %>%
+  filter(!is.na(dest)) %>% 
+  summarise(tot_mins = sum(dep_delay[dep_delay > 0]),
+            n = n(),
+            avg = tot_mins/n,
+            .groups = "keep") %>% 
+  ggplot() + 
+  geom_jitter(aes(avg, reorder(dest, avg), col = hour)) + 
+  scale_color_gradientn(colours = rainbow(6)) +
+  labs(title = "Delay for all Destination Aiports by Hour",
+       x = "Delay (min)",
+       y = "Desination Airport",
+       col = "Hour of Day")
+```
+
+
 # Precipitation
 
+The more precipitation
 Almost any amount of precipitation is associated with a delay. However, there is not a strong a trend above 0.02 in. of precipitation.
 ```{r}
 flight_weather %>% 
@@ -109,25 +106,41 @@ flight_weather %>%
   group_by(precip_cat) %>% 
   summarise(delay = mean(dep_delay, na.rm = T)) %>% 
   ggplot(aes(x = precip_cat, y = delay, fill= delay)) +
-  geom_col() + scale_fill_continuous(type = "viridis") 
+  geom_col() + scale_fill_continuous(type = "viridis") +
+  labs(title = "Precipitation vs Delay",
+       x = "Precipitation Categories",
+       y = "Delay (min)",
+       fill = "Delay")
 ```
-```{r}
+
+
+```{r warning=FALSE}
 flight_weather %>% 
   ungroup() %>% 
   group_by(hour, precip) %>% 
   summarise(delay = mean(dep_delay, na.rm = T), .groups = "keep") %>% 
-  ggplot() + geom_point(aes(x =hour, y = delay, col = precip)) + scale_color_gradientn(colours = rainbow(6))
+  ggplot() + 
+  geom_point(aes(x =precip, y = delay, col = hour)) + 
+  scale_color_gradientn(colours = rainbow(6)) +
+  labs(title = "Precipitation vs Delay for Each Hour of Day",
+       x = "Precipitation",
+       y = "Delay (min)",
+       col = "Hour of Day")
 ```
 
-```{r}
+```{r warning=FALSE}
 flight_weather %>% 
   ungroup() %>% 
   group_by(hour, precip) %>% 
   summarise(delay = mean(dep_delay, na.rm = T), .groups = "keep") %>% 
-  ggplot() + geom_point(aes(x =precip, y = delay, col = hour)) + scale_color_gradientn(colours = rainbow(6))
+  ggplot() + 
+  geom_point(aes(x =hour, y = delay, col = precip)) + 
+  scale_color_gradientn(colours = rainbow(6)) +
+  labs(title = "Hour of Day vs Delay for Precipitation",
+       x = "Hour of Day",
+       y = "Delay (min)",
+       col = "Precipitation")
 ```
-
-
 
 # Visibility
 
@@ -141,15 +154,14 @@ flight_weather %>%
   summarise(dep_delay = mean(dep_delay, na.rm = TRUE)) %>%
   ggplot(aes(x = visib_cat, y = dep_delay, fill = dep_delay)) +
   geom_col() + scale_fill_continuous(type = "viridis") + 
-  labs(title = "Visibility vs. Departure Delay", 
+  labs(title = "Visibility vs Delay", 
        x = "Visibility", 
-       y = "Mean Departure Delay", 
-       caption = "Lower visibility means you can't see as far",
-       fill = "Mean Departure Delay")
+       y = "Delay (min)", 
+       fill = "Delay")
 ```
 
 
-```{r}
+```{r warning=FALSE}
 flight_weather %>%
   ungroup() %>%
   mutate(visib_cat = cut_interval(visib, n = 10)) %>%
@@ -158,10 +170,9 @@ flight_weather %>%
   ggplot() +
   geom_point(aes(x = visib_cat, y = dep_delay, col = hour)) + 
   scale_color_gradientn(colours = rainbow(6)) + 
-  labs(title = "Visibility vs. Departure Delay", 
+  labs(title = "Visibility vs Delay for Each Hour of Day", 
        x = "Visibility", 
-       y = "Mean Departure Delay", 
-       caption = "Lower visibility means you can't see as far",
+       y = "Delay (min)", 
        col = "Hour")
 ```
 
