@@ -1,20 +1,15 @@
 ---
 title: "HW3"
 author: "Caitlin Bolz"
-date: "2/18/2021"
+date: "3/1/2021"
 output: html_document
 ---
-
-What time of day should you fly if you want to avoid delays as much as possible? 
-Does this choice depend on anything? Season? Weather? Airport? Airline? 
-
-
 
 # Introduction 
 
 Delays are unfortunately inevitable in life, but there are some steps an individual can take to reduce their airport flight delays. In this report I looked specifically at departure delay instead of arrival delay. I found departure delay to be more meaningful because it is based on what happens on the ground. An individual has more control over departure delay compared to arrival delay because arrival delay is based more on what happens while the plane is in the air. 
 
-You want to fly earlier in the day to minimize delays. This report specifically examines destination airports, precipitation, and visibility. Your destination airport affects your delay time, with some airports having short delays and others having long delays. The more precipitation on a given day, the longer your delay will be in general. The lower the visibility, the longer the delay. Additionally, at any given visibility delays will be shorter earlier in the day.
+You want to fly earlier in the day to minimize delays. This report specifically examines destination airports, precipitation, and visibility. Your destination airport affects your delay time, with some airports having short delays and others having long delays. The amount of precipitation on a given day, does not affect your delay times. The lower the visibility, the longer the delay. Additionally, at any given visibility delays will be shorter earlier in the day.
 
 ```{r include=FALSE}
 library(tidyr)
@@ -36,6 +31,7 @@ flights %>%
        y = "Average Delay (min)",
        fill = "Delay")
 ```
+
 We also need to combine our flights and weather data sets for some of our analysis.
 ```{r}
 flight_weather =
@@ -52,13 +48,7 @@ flight_weather =
 
 # Destination
 
-Some destination airports tend to have much longer delays than others. 
-
-Tulsa International Airport (TUL) and Columbia Metropolitian Airport (CAE) have the longest delay times for destination airports, regardless of time of day. Palm Springs International and Key West International Airport (EYW) have the shortest delay times for destination airports, regardless of time of day. Usually when going on a trip you determine your destination and then plan the rest of your trip around that. 
-
-It isn't likely that someone sees Tulsa has long delays and decides to avoid that city. So instead we need to look if there is a time of day that it is better to fly to these airports. When we take into account hour of day of the flight we see that generally there are shorter delays early in the day and longer delays later in the day. This doesn't apply to every flight, but is a good rule of thumb to follow. If you have to fly to an airport that has long delay times, it is best to fly there earlier in the day.
-
-
+Some destination airports tend to have much longer delays than others. Tulsa International Airport (TUL) and Columbia Metropolitian Airport (CAE) have the longest delay times for destination airports, regardless of time of day. Palm Springs International and Key West International Airport (EYW) have the shortest delay times for destination airports, regardless of time of day. Usually when going on a trip you determine your destination and then plan the rest of your trip around that.
 ```{r fig.width=6, fig.height=13}
 flights %>%
   group_by(dest) %>%
@@ -76,6 +66,7 @@ flights %>%
        fill = "Delay")
 ```
 
+It isn't likely that someone sees Tulsa has long delays and decides to avoid that city. So instead we need to look if there is a time of day that it is better to fly to these airports. When we take into account hour of day of the flight we see that generally there are shorter delays early in the day and longer delays later in the day. This doesn't apply to every flight, but is a good rule of thumb to follow. If you have to fly to an airport that has long delay times, it is best to fly there earlier in the day.
 ```{r fig.width=6, fig.height=13}
 flights %>%
   group_by(dest, hour) %>%
@@ -97,8 +88,7 @@ flights %>%
 
 # Precipitation
 
-The more precipitation
-Almost any amount of precipitation is associated with a delay. However, there is not a strong a trend above 0.02 in. of precipitation.
+It initially appears that the more precipitation on a given day, the longer your delays will be. The more we look into this, we realize that this isn't necessarily true.
 ```{r}
 flight_weather %>% 
   ungroup() %>% 
@@ -113,7 +103,7 @@ flight_weather %>%
        fill = "Delay")
 ```
 
-
+Looking at a graph of precipitation vs delay for each hour of the day it is hard to tell the relationship between the variables. It seems like there is a slightly positive relationship between precipitation and delay, but it is difficult to determine. As shown in previous graphs, we can see there is a relationship between hour of day and delay time. This relationship is fairly constant among precipitation amounts.
 ```{r warning=FALSE}
 flight_weather %>% 
   ungroup() %>% 
@@ -128,6 +118,7 @@ flight_weather %>%
        col = "Hour of Day")
 ```
 
+Looking at this graph we see there is no good relationship between precipitation, delay time, and time of day. This means you shouldn't worry about precipitation when choosing when to fly, since it does not significantly impact delay time.
 ```{r warning=FALSE}
 flight_weather %>% 
   ungroup() %>% 
@@ -142,10 +133,10 @@ flight_weather %>%
        col = "Precipitation")
 ```
 
+
 # Visibility
 
-There seems to be a stronger relationship between visibility and delay.
-Delays are higher when visibility is less than 2 miles.
+The lower the visibility, the higher the delay on average.
 ```{r}
 flight_weather %>%
   ungroup() %>%
@@ -160,7 +151,7 @@ flight_weather %>%
        fill = "Delay")
 ```
 
-
+This graph also shows us that as visibility decreases, delay times increase. When looking at the visibility for each mile grouping, the average delay time is lower if the flight is earlier in the day. You want your flight to have the highest visablity possible and leave earlier in the day to avoid delays.
 ```{r warning=FALSE}
 flight_weather %>%
   ungroup() %>%
@@ -175,5 +166,3 @@ flight_weather %>%
        y = "Delay (min)", 
        col = "Hour")
 ```
-
-
