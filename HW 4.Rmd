@@ -1,0 +1,94 @@
+---
+title: "HW 4"
+author: "Caitlin Bolz"
+date: "3/11/2021"
+output: html_document
+---
+
+```{r}
+library(shiny)
+library(maps)
+library(mapproj)
+```
+
+Go to github.com. Make an empty repository called CensusApp. Clone the repo in Rstudio. Then, go through Lesson 5 to construct the app in that repository. Commit and push your repository. Then, turn in the command
+
+
+```{r}
+source("CensusApp/helper.R")
+counties <- readRDS("CensusApp/data/counties.rds")
+percent_map(counties$white, "darkgreen", "% White")
+```
+
+
+```{r}
+shinyApp(ui, server)
+```
+
+
+
+
+
+
+# Runs your code
+```{r}
+runGitHub("CensusApp", "cabolz")
+```
+
+
+
+
+
+
+# User interface ----
+ui <- fluidPage(
+  titlePanel("censusVis"),
+  
+  sidebarLayout(
+    sidebarPanel(
+      helpText("Create demographic maps with 
+        information from the 2010 US Census."),
+      
+      selectInput("var", 
+                  label = "Choose a variable to display",
+                  choices = c("Percent White", "Percent Black",
+                              "Percent Hispanic", "Percent Asian"),
+                  selected = "Percent White"),
+      
+      sliderInput("range", 
+                  label = "Range of interest:",
+                  min = 0, max = 100, value = c(0, 100))
+    ),
+    
+    mainPanel(plotOutput("map"))
+  )
+)
+
+# Server logic ----
+```{r}
+server <- function(input, output) {
+  output$map <- renderPlot({
+    data <- switch(input$var, 
+                   "Percent White" = counties$white,
+                   "Percent Black" = counties$black,
+                   "Percent Hispanic" = counties$hispanic,
+                   "Percent Asian" = counties$asian)
+    
+    color <- switch(input$var, 
+                    "Percent White" = "darkgreen",
+                    "Percent Black" = "black",
+                    "Percent Hispanic" = "darkorange",
+                    "Percent Asian" = "darkviolet")
+    
+    legend <- switch(input$var, 
+                     "Percent White" = "% White",
+                     "Percent Black" = "% Black",
+                     "Percent Hispanic" = "% Hispanic",
+                     "Percent Asian" = "% Asian")
+    
+    percent_map(data, color, legend, input$range[1], input$range[2])
+  })
+}
+```
+# Run app ----
+shinyApp(ui, server)

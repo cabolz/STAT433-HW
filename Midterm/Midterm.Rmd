@@ -1,0 +1,97 @@
+---
+title: "Midterm"
+author: "Caitlin Bolz"
+date: "3/2/2021"
+output: html_document
+---
+  
+
+#### 1.  Map the delay by destination
+  
+Compute the average delay by destination, then join on the airports data frame so you can show the spatial distribution of delays. Here's an easy way to draw a map of the United States.  You are welcome to use this code or some other code. 
+
+```{r warning=TRUE}
+library(tidyverse)
+library(nycflights13)
+library(maps)
+
+airports %>%
+  semi_join(flights, c("faa" = "dest")) %>%
+  ggplot(aes(lon, lat)) +
+  borders("state") +
+  geom_point() +
+  coord_quickmap()
+```
+
+You might want to use the size or color of the points to display the average delay for each airport.
+
+```{r}
+flights %>% 
+  group_by(dest) %>% 
+  summarise(delay = mean(arr_delay, na.rm = T)) %>% 
+  inner_join(airports, by = c(dest = "faa")) %>% 
+  ggplot(aes(lon, lat, col = delay)) + 
+  borders("state") + 
+  geom_point() + 
+  coord_quickmap() + 
+  scale_color_gradientn(colours = rainbow(3)) 
+```
+
+
+#### 2.   Do planes trade ownership?
+
+You might expect that there's an implicit relationship between plane and airline, because each plane is flown by a single airline. Explore this conjecture using data. (Let's assume that the tail number of a plane does not change.)
+
+If we assume that each tail number doesn't change, we see there are 18 tail numbers that appear under more than one airline. This demonstrates that planes can trade ownership and be sold to other airlines, although it isn't super common. 
+```{r message=FALSE, warning=FALSE}
+tailnum_by_airline = flights %>%   
+  group_by(tailnum, carrier) %>% 
+  summarise(n =n())
+
+tailnum_count = tailnum_by_airline %>% count(tailnum)
+
+sum(tailnum_count$n > 1)
+```
+
+
+
+#### 3a.  Plane's average speed
+
+Notice that ```flights$air_time``` is in minutes.  Make a new column that is the air time in hours. 
+
+```{r}
+flights = flights %>% mutate(air_hour = (air_time /60))
+```
+
+
+#### 3b. Average speed
+
+For each flight, compute the average speed of that flight (in miles per hour).  
+Then, for each plane, compute the average of those average speeds. 
+Display it in a histogram. You can use a base R histogram ```hist``` or ggplot's ```geom_histogram```. 
+
+
+```{r warning=FALSE}
+flights %>% 
+  group_by(flight) %>% 
+  mutate(speed1 = distance/air_hour) %>% 
+  group_by(tailnum) %>% 
+  mutate(speed2 = mean(speed1, na.rm = T)) %>% 
+  ggplot(aes(speed2)) + 
+  geom_histogram(bins = 50) + 
+  labs(title = "Average Speed of Each Flight by Plane", x = "Speed", y = "Count")
+```
+
+
+
+
+#### 4. Bonus
+
+Make a table where each row is a destination, each column is a carrier, and each element is the number of times that the carrier has flown to that destination.  Ensure that you only count flights that arrived at the destination. 
+
+```{r message=FALSE, warning=FALSE}
+flights %>% 
+  group_by(dest, carrier) %>% 
+  summarise(count = n())  %>% 
+  pivot_wider(names_from = carrier, values_from = count)
+```
