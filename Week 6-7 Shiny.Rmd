@@ -368,3 +368,18 @@ Add a second line of reactive text to the main panel of your Shiny app. This lin
 3) surround R expressions by curly braces, {}, in each render* function,
 4) save your render* expressions in the output list, with one entry for each reactive object in your app, and
 5) create reactivity by including an input value in a render* expression. If you follow these rules, Shiny will automatically make your objects reactive.
+
+# Lesson 5
+
+```{r}
+library(maps)
+library(mapproj)
+source("census-app/helpers.R")
+counties <- readRDS("census-app/data/counties.rds")
+percent_map(counties$white, "darkgreen", "% White")
+```
+
+```{r}
+runGitHub("census-app", "cabolz")
+```
+
