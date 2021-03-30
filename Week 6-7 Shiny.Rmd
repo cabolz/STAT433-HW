@@ -380,6 +380,6 @@ percent_map(counties$white, "darkgreen", "% White")
 ```
 
 ```{r}
-runGitHub("census-app", "cabolz")
+runGitHub(repo = "STAT433-HW", username = "cabolz")
 ```
 
